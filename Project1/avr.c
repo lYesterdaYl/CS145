@@ -1,11 +1,6 @@
 #include "avr.h"
 
 void
-ini_avr(void)
-{
-}
-
-void
 wait_avr(unsigned short msec)
 {
   TCCR0 = 3;
@@ -15,4 +10,21 @@ wait_avr(unsigned short msec)
     while (!GET_BIT(TIFR, TOV0));
   }
   TCCR0 = 0;
+}
+
+int main (void){
+	SET_BIT(DDRB,0);
+	CLR_BIT(DDRB,1);
+	while(1){
+		if((!GET_BIT(PINB,1))){
+			SET_BIT(PORTB,0);
+			wait_avr(500);
+			CLR_BIT(PORTB,0);
+			wait_avr(500);
+		}
+		else {
+			CLR_BIT(PORTB,0);
+		}
+		
+	}
 }
