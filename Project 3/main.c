@@ -6,7 +6,8 @@
 #include "avr.h"
 #include "lcd.h"
 
-#define A_NOTE 114
+//original 100000/frequency/2 => period
+#define A_NOTE 113
 #define A_SHARP_NOTE 108
 #define B_NOTE 101
 #define C_NOTE 96
@@ -19,8 +20,8 @@
 #define G_NOTE 64
 #define G_SHARP_NOTE 60
 
-int tempo = 1;
-int volume = 1;
+int tempo = 10;
+int volume = 5;
 int play = 0;
 
 int birthday[] = {G_NOTE, G_NOTE, A_NOTE, G_NOTE, C_NOTE, B_NOTE, G_NOTE, G_NOTE, A_NOTE, G_NOTE, D_NOTE, C_NOTE, G_NOTE,G_NOTE,G_NOTE,E_NOTE,C_NOTE,B_NOTE,A_NOTE,F_NOTE,F_NOTE,E_NOTE,C_NOTE, D_NOTE, C_NOTE};
@@ -137,10 +138,10 @@ char num_to_value(int num){
     return 0;
 }
 
-void wait_avr_2(unsigned int usec){
+void wait_avr_2(unsigned short usec){
     TCCR0 = 2;
     while (usec--) {
-        TCNT0 = (unsigned char)(256 - (XTAL_FRQ / 8) * 0.00001);
+        TCNT0 = (unsigned char)(256 - (XTAL_FRQ / 64) * 0.0001);
         SET_BIT(TIFR, TOV0);
         WDR();
         while (!GET_BIT(TIFR, TOV0));
@@ -150,17 +151,21 @@ void wait_avr_2(unsigned int usec){
 
 void play_note(unsigned int frequency,unsigned int duration){
     int i;
-    int cycle = duration * 8 * 20000 / ((float)(tempo+10)/10) / frequency;
+    //Since duration isn't long in default(too fast), so I time it by 20000 to make it slower and divide it by note period for correct note cycle.
+    //also divide the tempo(range 1.1 - 3) to make the cycle smaller, so it plays faster.
+    int cycle = duration*20000/frequency/((float)(tempo+10)/10);
 
     //volume setting
-    unsigned int Th = frequency * (volume / 100.0);
-    unsigned int Tl = frequency - Th;
+    //th times a fraction of volume so make the sound louder or less louder.
+    unsigned int th = frequency*(volume/100.0);
+    unsigned int tl = frequency-th;
     for(i = 0; i < cycle; i++){
         SET_BIT(PORTB,3);
-        wait_avr_2(Th);
+        wait_avr_2(th);
         CLR_BIT(PORTB,3);
-        wait_avr_2(Tl);
+        wait_avr_2(tl);
     }
+
 }
 
 
