@@ -167,60 +167,6 @@ void play_note(unsigned int frequency,unsigned int duration){
 	
 }
 
-
-void play_birthday(){
-    clr_lcd();
-    char tempobuffer[20];
-    char volumebuffer[20];
-	for (int i = 0; i < (int)( sizeof(birthday) / sizeof(birthday[0])); i++)
-	{
-		int num = get_key();
-		sprintf(tempobuffer, "Tempo: %02i", tempo);
-		pos_lcd(0, 0);
-		puts_lcd2(tempobuffer);
-		
-		sprintf(volumebuffer, "Volume: %02i", volume);
-		pos_lcd(1, 0);
-		puts_lcd2(volumebuffer);
-		if (num_to_value(num) == 'A')
-		{
-			if (tempo >= 1 && tempo < 20)
-			{
-				tempo++;
-
-			}
-		}
-		else if (num_to_value(num) == 'B')
-		{
-			if (tempo > 1 && tempo <= 20)
-			{
-				tempo--;
-			}
-		}
-		else if (num_to_value(num) == 'C')
-		{
-			if (volume >= 1 && volume < 10)
-			{
-				volume++;
-			}
-		}
-		else if (num_to_value(num) == 'D')
-		{
-			if (volume > 1 && volume <= 10)
-			{
-				volume--;
-			}
-		}
-		else if (num_to_value(num) == '*')
-		{
-			play = 0;
-			break;
-		}
-		play_note(birthday[i], 1);
-		wait_avr(50);
-	}
-}
-
 int get_sample_1()
 {
 	ADMUX |= (1<<REFS0);
@@ -262,26 +208,6 @@ int get_sample_2()
 	wait_avr(15);
 	return ADC;
 }
-
-
-int get_sample()
-{
-	ADMUX |= (1<<REFS0);
-	CLR_BIT(ADMUX, 0);
-	CLR_BIT(ADMUX, 1);
-	CLR_BIT(ADMUX, 2);
-	CLR_BIT(ADMUX, 3);
-
-	SET_BIT(ADMUX, 4);
-	
-	SET_BIT(ADCSRA, 7); //enable
-	SET_BIT(ADCSRA, 6); //start conversion
-	while(GET_BIT(ADCSRA, 6)); //wait to finish
-	wait_avr(15);
-	return ADC;
-}
-
-
 
 int main(){
     ini_avr();
@@ -376,13 +302,7 @@ int main(){
 				play_note(A_NOTE, 1);
 			}
 		}
-/*
-		if (curr > 5.2)
-		{
-			curr *= -1;
-			curr += 5;
-		}*/
-		
+
 		total += curr;
 		if (curr < min)
 		{
